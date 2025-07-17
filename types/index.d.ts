@@ -54,6 +54,7 @@ interface AgentProps {
   feedbackId?: string;
   type: 'generate' | 'interview';
   questions?: string[];
+  profileImage?: string; // Add this line
 }
 
 interface RouteParams {
