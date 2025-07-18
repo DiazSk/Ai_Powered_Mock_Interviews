@@ -21,16 +21,6 @@ interface SavedMessage {
   content: string;
 }
 
-interface AgentProps {
-  userName: string;
-  userId?: string;
-  interviewId?: string;
-  feedbackId?: string;
-  type: 'generate' | 'interview';
-  questions?: string[];
-  profileImage?: string; // Add this line
-}
-
 const Agent = ({
   userName,
   userId,
@@ -71,6 +61,10 @@ const Agent = ({
       if (message.type === 'function-call-result') {
         console.log('✅ Function call result:', message);
       }
+
+      if (message.type === 'tool-calls') {
+        console.log('🛠️ Tool calls:', message);
+      }
     };
 
     const onSpeechStart = () => {
@@ -110,7 +104,7 @@ const Agent = ({
     }
 
     const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-      console.log('handleGenerateFeedback');
+      console.log('🔍 handleGenerateFeedback');
 
       const { success, feedbackId: id } = await createFeedback({
         interviewId: interviewId!,
@@ -122,7 +116,7 @@ const Agent = ({
       if (success && id) {
         router.push(`/interview/${interviewId}/feedback`);
       } else {
-        console.log('Error saving feedback');
+        console.log('❌ Error saving feedback');
         router.push('/');
       }
     };
@@ -140,29 +134,48 @@ const Agent = ({
     try {
       console.log('🚀 handleCall triggered');
       console.log('📋 Type:', type);
-
-      // Debug: Check if environment variable is loaded
-      console.log('🔍 All env vars:', {
-        VAPI_WEB_TOKEN: !!process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN,
-        VAPI_ASSISTANT_ID: process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID,
-        VAPI_WORKFLOW_ID: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID,
-      });
+      console.log('👤 User:', userName, 'ID:', userId);
 
       setCallStatus(CallStatus.CONNECTING);
 
       if (type === 'generate') {
-        const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
+        const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID!;
         console.log('🤖 Starting assistant with ID:', assistantId);
 
         if (!assistantId) {
           throw new Error('NEXT_PUBLIC_VAPI_ASSISTANT_ID is not set');
         }
 
-        await vapi.start(assistantId);
+        // Pass user ID as a variable
+        await vapi.start(assistantId, {
+          variableValues: {
+            userid: userId,
+            username: userName,
+          },
+        });
+
         console.log('✅ Assistant started successfully');
       } else {
-        // ... rest of your interview code
+        let formattedQuestions = '';
+        if (questions) {
+          formattedQuestions = questions
+            .map(question => `- ${question}`)
+            .join('\n');
+        }
+
+        console.log('🎯 Starting interview with:', {
+          questionsCount: questions?.length,
+          formattedQuestions: formattedQuestions.substring(0, 100) + '...',
+        });
+
+        await vapi.start(interviewer, {
+          variableValues: {
+            questions: formattedQuestions,
+          },
+        });
       }
+
+      console.log('✅ Vapi.start completed successfully');
     } catch (error) {
       console.error('💥 Error in handleCall:', error);
       setCallStatus(CallStatus.INACTIVE);
