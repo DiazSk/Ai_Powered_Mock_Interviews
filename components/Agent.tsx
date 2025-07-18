@@ -125,24 +125,18 @@ const Agent = ({
   }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
 
   const handleCall = async () => {
-    console.log('handleCall triggered');
-    console.log('Type:', type);
-
-    setCallStatus(CallStatus.CONNECTING);
-
     try {
-      if (type === 'generate') {
-        console.log('Starting workflow with:', {
-          workflowId: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID,
-          variables: { username: userName, userid: userId },
-        });
+      console.log('handleCall triggered');
+      console.log('Type:', type);
 
-        await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
-          variableValues: {
-            username: userName,
-            userid: userId,
-          },
-        });
+      setCallStatus(CallStatus.CONNECTING);
+
+      if (type === 'generate') {
+        // Use the assistant ID from environment
+        const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID!;
+        console.log('Starting assistant with ID:', assistantId);
+
+        await vapi.start(assistantId);
       } else {
         let formattedQuestions = '';
         if (questions) {
@@ -152,29 +146,21 @@ const Agent = ({
         }
 
         console.log('Starting interview with:', {
-          questionsCount: questions?.length || 0,
-          formattedQuestions,
+          questionsCount: questions?.length,
+          formattedQuestions: formattedQuestions.substring(0, 100) + '...',
         });
 
-        // Updated interviewer configuration with function calling
-        const interviewerWithVariables = {
-          ...interviewer,
+        await vapi.start(interviewer, {
           variableValues: {
             questions: formattedQuestions,
-            userId: userId,
-            interviewId: interviewId,
           },
-        };
-
-        await vapi.start(interviewerWithVariables);
+        });
       }
+
       console.log('Vapi.start completed successfully');
     } catch (error) {
       console.error('Error in handleCall:', error);
       setCallStatus(CallStatus.INACTIVE);
-      alert(
-        `Call failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
     }
   };
 

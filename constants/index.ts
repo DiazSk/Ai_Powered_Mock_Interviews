@@ -107,17 +107,13 @@ export const interviewer: CreateAssistantDTO = {
     language: 'en',
   },
   voice: {
-    provider: '11labs',
-    voiceId: 'sarah',
-    stability: 0.4,
-    similarityBoost: 0.8,
-    speed: 0.9,
-    style: 0.5,
-    useSpeakerBoost: true,
+    provider: 'playht', // Change from "11labs" to "playht"
+    voiceId: 'jennifer', // Use a valid PlayHT voice
+    speed: 1.0,
   },
   model: {
     provider: 'openai',
-    model: 'gpt-4',
+    model: 'gpt-3.5-turbo', // Change from "gpt-4" to "gpt-3.5-turbo"
     messages: [
       {
         role: 'system',
@@ -136,7 +132,7 @@ Be professional, yet warm and welcoming:
 Use official yet friendly language.
 Keep responses concise and to the point (like in a real voice interview).
 Avoid robotic phrasing—sound natural and conversational.
-Answer the candidate’s questions professionally:
+Answer the candidate's questions professionally:
 
 If asked about the role, company, or expectations, provide a clear and relevant answer.
 If unsure, redirect the candidate to HR for more details.
@@ -146,10 +142,10 @@ Thank the candidate for their time.
 Inform them that the company will reach out soon with feedback.
 End the conversation on a polite and positive note.
 
-
 - Be sure to be professional and polite.
 - Keep all your responses short and simple. Use official language, but be kind and welcoming.
-- This is a voice conversation, so keep your responses short, like in a real conversation. Don't ramble for too long.`,
+- This is a voice conversation, so keep your responses short, like in a real conversation.
+- Ask only one question at a time and wait for the candidate's response before proceeding.`,
       },
     ],
   },
