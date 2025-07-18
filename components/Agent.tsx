@@ -169,6 +169,7 @@ const Agent = ({
       alert(`Failed to start interview: ${error.message || 'Unknown error'}`);
     }
   };
+
   const handleDisconnect = () => {
     setCallStatus(CallStatus.FINISHED);
     vapi.stop();
