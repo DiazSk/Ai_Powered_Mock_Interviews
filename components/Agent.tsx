@@ -125,12 +125,8 @@ const Agent = ({
   }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
 
   const handleCall = async () => {
-    console.log('handleCall triggered'); // Debug log
-    console.log('Type:', type); // Debug log
-    console.log('Environment variables:', {
-      workflowId: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID,
-      webToken: process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN ? 'Set' : 'Not set',
-    }); // Debug log
+    console.log('handleCall triggered');
+    console.log('Type:', type);
 
     setCallStatus(CallStatus.CONNECTING);
 
@@ -160,19 +156,25 @@ const Agent = ({
           formattedQuestions,
         });
 
-        await vapi.start(interviewer, {
+        // Updated interviewer configuration with function calling
+        const interviewerWithVariables = {
+          ...interviewer,
           variableValues: {
             questions: formattedQuestions,
+            userId: userId,
+            interviewId: interviewId,
           },
-        });
+        };
+
+        await vapi.start(interviewerWithVariables);
       }
       console.log('Vapi.start completed successfully');
     } catch (error) {
       console.error('Error in handleCall:', error);
-      setCallStatus(CallStatus.INACTIVE); // Reset status on error
+      setCallStatus(CallStatus.INACTIVE);
       alert(
         `Call failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-      ); // Show user-friendly error
+      );
     }
   };
 
