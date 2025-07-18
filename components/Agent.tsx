@@ -138,44 +138,37 @@ const Agent = ({
 
   const handleCall = async () => {
     try {
-      console.log('handleCall triggered');
-      console.log('Type:', type);
+      console.log('🚀 handleCall triggered');
+      console.log('📋 Type:', type);
+
+      // Debug: Check if environment variable is loaded
+      console.log('🔍 All env vars:', {
+        VAPI_WEB_TOKEN: !!process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN,
+        VAPI_ASSISTANT_ID: process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID,
+        VAPI_WORKFLOW_ID: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID,
+      });
 
       setCallStatus(CallStatus.CONNECTING);
 
       if (type === 'generate') {
-        // Use the assistant ID from environment
-        const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID!;
-        console.log('Starting assistant with ID:', assistantId);
+        const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
+        console.log('🤖 Starting assistant with ID:', assistantId);
 
-        await vapi.start(assistantId);
-      } else {
-        let formattedQuestions = '';
-        if (questions) {
-          formattedQuestions = questions
-            .map(question => `- ${question}`)
-            .join('\n');
+        if (!assistantId) {
+          throw new Error('NEXT_PUBLIC_VAPI_ASSISTANT_ID is not set');
         }
 
-        console.log('Starting interview with:', {
-          questionsCount: questions?.length,
-          formattedQuestions: formattedQuestions.substring(0, 100) + '...',
-        });
-
-        await vapi.start(interviewer, {
-          variableValues: {
-            questions: formattedQuestions,
-          },
-        });
+        await vapi.start(assistantId);
+        console.log('✅ Assistant started successfully');
+      } else {
+        // ... rest of your interview code
       }
-
-      console.log('Vapi.start completed successfully');
     } catch (error) {
-      console.error('Error in handleCall:', error);
+      console.error('💥 Error in handleCall:', error);
       setCallStatus(CallStatus.INACTIVE);
+      alert(`Failed to start interview: ${error.message || 'Unknown error'}`);
     }
   };
-
   const handleDisconnect = () => {
     setCallStatus(CallStatus.FINISHED);
     vapi.stop();
