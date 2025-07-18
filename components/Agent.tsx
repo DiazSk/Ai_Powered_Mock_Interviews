@@ -55,24 +55,36 @@ const Agent = ({
     };
 
     const onMessage = (message: Message) => {
+      console.log('📩 Message received:', message);
+
       if (message.type === 'transcript' && message.transcriptType === 'final') {
         const newMessage = { role: message.role, content: message.transcript };
+        console.log('💬 Final transcript:', newMessage);
         setMessages(prev => [...prev, newMessage]);
+      }
+
+      // Log function calls
+      if (message.type === 'function-call') {
+        console.log('🔧 Function call detected:', message);
+      }
+
+      if (message.type === 'function-call-result') {
+        console.log('✅ Function call result:', message);
       }
     };
 
     const onSpeechStart = () => {
-      console.log('speech start');
+      console.log('🎤 Speech start - AI is speaking');
       setIsSpeaking(true);
     };
 
     const onSpeechEnd = () => {
-      console.log('speech end');
+      console.log('🎤 Speech end - AI finished speaking');
       setIsSpeaking(false);
     };
 
     const onError = (error: Error) => {
-      console.log('Error:', error);
+      console.log('❌ Vapi Error:', error);
     };
 
     vapi.on('call-start', onCallStart);
